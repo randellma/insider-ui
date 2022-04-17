@@ -1,24 +1,19 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {OpenAPI} from "./generated";
+import {PLAYER_ID} from "./constants";
+import { v4 as uuid } from 'uuid'
+import InsiderComponent from "./InsiderComponent";
 
 function App() {
+  OpenAPI.BASE = 'http://localhost:3000';
+  if(!localStorage.getItem(PLAYER_ID)) {
+    localStorage.setItem(PLAYER_ID, uuid())
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <InsiderComponent />
     </div>
   );
 }
