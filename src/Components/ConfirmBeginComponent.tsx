@@ -5,23 +5,22 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
 import {GameControllerService} from "../generated";
-import DialogContentText from "@mui/material/DialogContentText";
+import {FormControlLabel, Checkbox, RadioGroup, Radio} from "@mui/material";
 
-function CreateGameComponent(props: Props) {
-    const [playerName, setPlayerName] = useState<string>("");
+function ConfirmBeginComponent(props: Props) {
     const [errorText, setErrorText] = useState<string>("");
 
     const handleClose = () => {
-        setPlayerName("")
         setErrorText("")
-        props.handleClose()
+        props.handleClose();
     }
 
     const handleConfirm = () => {
-        GameControllerService.createGame(props.playerId, playerName)
-            .then(e => {
-                handleClose()
+        GameControllerService.assignRoles(props.playerId)
+            .then((e) => {
+                handleClose();
             })
             .catch(e => {
                 setErrorText(e.body.message)
@@ -33,24 +32,14 @@ function CreateGameComponent(props: Props) {
         maxWidth={"sm"}
         open={props.open}
         onClose={handleClose}>
-        <DialogTitle>Create New Game</DialogTitle>
+        <DialogTitle>Confirm Begin</DialogTitle>
         <DialogContent>
-            <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Player Name"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={playerName}
-                onChange={e => setPlayerName(e.target.value)}
-            />
+            <DialogContentText mt={4}>Begin the game and assign roles?</DialogContentText>
             {errorText && <DialogContentText style={{color: 'red'}} mt={4}>{errorText}</DialogContentText>}
         </DialogContent>
         <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleConfirm}>Create</Button>
+            <Button onClick={handleConfirm}>Confirm</Button>
         </DialogActions>
     </Dialog>
 }
@@ -61,4 +50,4 @@ interface Props {
     handleClose: () => void
 }
 
-export default CreateGameComponent
+export default ConfirmBeginComponent

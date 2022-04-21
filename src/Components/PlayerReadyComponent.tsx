@@ -7,21 +7,22 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import {GameControllerService} from "../generated";
+import {FormControlLabel, Checkbox, RadioGroup, Radio} from "@mui/material";
 
 function JoinGameComponent(props: Props) {
-    const [playerName, setPlayerName] = useState<string>("");
-    const [gameCode, setGameCode] = useState<string>("");
+    const [role, setRole] = useState<'LEADER' | 'INSIDER' | 'COMMON' | "">("");
+    const [ready, setReady] = useState<boolean>(true);
     const [errorText, setErrorText] = useState<string>("");
 
     const handleClose = () => {
-        setPlayerName("")
-        setGameCode("")
+        setRole("")
+        setReady(true)
         setErrorText("")
         props.handleClose();
     }
 
     const handleConfirm = () => {
-        GameControllerService.joinGame(props.playerId, playerName, gameCode.toUpperCase())
+        GameControllerService.ready(props.playerId, ready, role === "" ? undefined : role)
             .then((e) => {
                 handleClose();
             })
@@ -35,35 +36,27 @@ function JoinGameComponent(props: Props) {
         maxWidth={"sm"}
         open={props.open}
         onClose={handleClose}>
-        <DialogTitle>Join Game</DialogTitle>
+        <DialogTitle>Confirm Ready</DialogTitle>
         <DialogContent>
-            <TextField
-                autoFocus
-                margin="dense"
-                id="playerName"
-                label="Player Name"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={playerName}
-                onChange={e => setPlayerName(e.target.value)}
-            />
-            <TextField
-                autoFocus
-                margin="dense"
-                id="gameCode"
-                label="Game Code"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={gameCode}
-                onChange={e => setGameCode(e.target.value)}
-            />
+            <FormControlLabel control={<Checkbox onChange={e => setReady(e.target.checked)} defaultChecked/>}
+                              label="Ready"/>
+            <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                value={role}
+                onChange={e => setRole(e.target.value as 'LEADER' | 'INSIDER' | 'COMMON' | "")}
+            >
+                <FormControlLabel value="" control={<Radio/>} label="Random"/>
+                <FormControlLabel value="LEADER" control={<Radio/>} label="Leader"/>
+                {/*<FormControlLabel value="INSIDER" control={<Radio />} label="Insider" />*/}
+                {/*<FormControlLabel value="COMMON" control={<Radio />} label="Common" />*/}
+            </RadioGroup>
             {errorText && <DialogContentText style={{color: 'red'}} mt={4}>{errorText}</DialogContentText>}
         </DialogContent>
         <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleConfirm}>Join</Button>
+            <Button onClick={handleConfirm}>Confirm</Button>
         </DialogActions>
     </Dialog>
 }
