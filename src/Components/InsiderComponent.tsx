@@ -11,6 +11,8 @@ import ConfirmBeginComponent from "./ConfirmBeginComponent";
 import ConfirmResetComponent from "./ConfirmResetComponent";
 import ConfirmSwapWordComponent from "./ConfirmSwapWordComponent";
 import ConfirmStartComponent from "./ConfirmStartComponent";
+import ConfirmGuessedComponent from "./ConfirmGuessedComponent";
+import ConfirmTimeupComponent from "./ConfirmTimeupComponent";
 
 function InsiderComponent() {
     const [gameState, setGameState] = useState<GameStateDto>({});
@@ -22,6 +24,8 @@ function InsiderComponent() {
     const [confirmResetOpen, setConfirmResetOpen] = useState<boolean>(false);
     const [confirmSwapWordOpen, setConfirmSwapWordOpen] = useState<boolean>(false);
     const [confirmStartOpen, setConfirmStartOpen] = useState<boolean>(false);
+    const [confirmGuessedOpen, setConfirmGuessedOpen] = useState<boolean>(false);
+    const [confirmTimeupOpen, setConfirmTimeUpOpen] = useState<boolean>(false);
     const [showRole, setshowRole] = useState<boolean>(true);
 
     const getLatestState = useCallback(() => {
@@ -35,6 +39,8 @@ function InsiderComponent() {
             setConfirmResetOpen(false)
             setConfirmSwapWordOpen(false)
             setConfirmStartOpen(false)
+            setConfirmGuessedOpen(false)
+            setConfirmTimeUpOpen(false)
             setGameState(e)
         });
     }, [playerId]);
@@ -61,12 +67,17 @@ function InsiderComponent() {
                 return <div key={gameAction}><Button variant={"outlined"}
                                                      onClick={() => setConfirmBeginOpen(true)}>Begin</Button></div>
             case "EXCHANGE_WORD":
-                return <div key={gameAction}><Button variant={"outlined"}
-                                                     onClick={() => setConfirmSwapWordOpen(true)}>Swap Word</Button>
+                return <div key={gameAction}><Button variant={"outlined"} onClick={() => setConfirmSwapWordOpen(true)}>Swap Word</Button>
                 </div>
             case "START":
                 return <div key={gameAction}><Button variant={"outlined"}
                                                      onClick={() => setConfirmStartOpen(true)}>Start</Button></div>
+            case "GUESSED":
+                return <div key={gameAction}><Button variant={"outlined"}
+                                                     onClick={() => setConfirmGuessedOpen(true)}>Guessed</Button></div>
+            case "TIME_UP":
+                return <div key={gameAction}><Button variant={"outlined"}
+                                                     onClick={() => setConfirmTimeUpOpen(true)}>Time Up</Button></div>
             default:
                 return <div key={gameAction}><Button variant={"outlined"}>{gameAction}</Button></div>
         }
@@ -86,6 +97,27 @@ function InsiderComponent() {
                         {gameState.secretWord && <p>Secret Word: {gameState.secretWord}</p>}
                     </div>
                 </Stack>
+            case "SUMMARY":
+                const summary = gameState.gameSummary;
+                const votes = summary?.votes || {}
+                const voteArray = []
+                for (const property in votes) {
+                    voteArray.push({player: property, count: votes[property]})
+                }
+                voteArray.sort((x,y) => y.count - x.count);
+                let accusedPlayer = null;
+                if((voteArray.length > 1 && voteArray[0] > voteArray[1]) || voteArray.length === 1) {
+                    accusedPlayer = voteArray[0]
+                }
+                const insiderLost = accusedPlayer?.player === summary?.insider
+                return <Stack mt={3} justifyContent="center">
+                    <p>Insider: {summary?.insider}</p>
+                    <p>Secret Word: {summary?.secretWord}</p>
+                    {voteArray.map(e => <p key={e.player}>{e.player}: {e.count}</p>)}
+                    <p>Winner: {insiderLost ? "The Commons" : "The Insider"}</p>
+                </Stack>
+            default:
+                return <div></div>
         }
     }
 
@@ -104,6 +136,8 @@ function InsiderComponent() {
         <ConfirmResetComponent playerId={playerId} open={confirmResetOpen} handleClose={getLatestState}/>
         <ConfirmSwapWordComponent playerId={playerId} open={confirmSwapWordOpen} handleClose={getLatestState}/>
         <ConfirmStartComponent playerId={playerId} open={confirmStartOpen} handleClose={getLatestState}/>
+        <ConfirmGuessedComponent playerId={playerId} open={confirmGuessedOpen} handleClose={getLatestState}/>
+        <ConfirmTimeupComponent playerId={playerId} open={confirmTimeupOpen} handleClose={getLatestState}/>
     </div>
 }
 
