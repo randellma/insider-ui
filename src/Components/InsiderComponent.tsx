@@ -13,6 +13,7 @@ import ConfirmSwapWordComponent from "./ConfirmSwapWordComponent";
 import ConfirmStartComponent from "./ConfirmStartComponent";
 import ConfirmGuessedComponent from "./ConfirmGuessedComponent";
 import ConfirmTimeupComponent from "./ConfirmTimeupComponent";
+import Countdown from 'react-countdown';
 
 function InsiderComponent() {
     const [gameState, setGameState] = useState<GameStateDto>({});
@@ -116,6 +117,13 @@ function InsiderComponent() {
                     {voteArray.map(e => <p key={e.player}>{e.player}: {e.count}</p>)}
                     <p>Winner: {insiderLost ? "The Commons" : "The Insider"}</p>
                 </Stack>
+            case "PLAYING":
+                console.log("Countdown " + Date.parse(gameState.lastActivity || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5)*6000)
+                console.log("Now" + Date.now());
+                return <div>
+                    <Countdown date={Date.parse(gameState.lastActivity || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5)*1000*60} />
+                    {/* <Countdown date={Date.now() + 1000} /> */}
+                    </div>
             default:
                 return <div></div>
         }
