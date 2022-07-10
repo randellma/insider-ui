@@ -117,6 +117,12 @@ function InsiderComponent() {
                     {voteArray.map(e => <p key={e.player}>{e.player}: {e.count}</p>)}
                     <p>Winner: {insiderLost ? "The Commons" : "The Insider"}</p>
                 </Stack>
+            case "LOST":
+                return <Stack mt={3} justifyContent="center">
+                    <p>Everyone Lost <span role="img" aria-label="loudly crying face">😭</span></p>
+                    <p>Insider: {gameState.gameSummary?.insider}</p>
+                    <p>Secret Word: {gameState.gameSummary?.secretWord}</p>
+                </Stack>
             case "PLAYING":
                 console.log("Countdown " + Date.parse(gameState.lastActivity || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5)*6000)
                 console.log("Now" + Date.now());
