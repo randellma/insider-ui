@@ -14,6 +14,8 @@ import ConfirmStartComponent from "./ConfirmStartComponent";
 import ConfirmGuessedComponent from "./ConfirmGuessedComponent";
 import ConfirmTimeupComponent from "./ConfirmTimeupComponent";
 import Countdown from 'react-countdown';
+import CastVoteComponent from "./CastVoteComponent";
+import ConfirmVotingCompleteComponent from "./ConfirmVotingCompleteComponent";
 
 function InsiderComponent() {
     const [gameState, setGameState] = useState<GameStateDto>({});
@@ -27,6 +29,8 @@ function InsiderComponent() {
     const [confirmStartOpen, setConfirmStartOpen] = useState<boolean>(false);
     const [confirmGuessedOpen, setConfirmGuessedOpen] = useState<boolean>(false);
     const [confirmTimeupOpen, setConfirmTimeUpOpen] = useState<boolean>(false);
+    const [castVoteOpen, setCastVoteOpen] = useState<boolean>(false);
+    const [confirmCompleteOpen, setConfirmCompleteOpen] = useState<boolean>(false);
     const [showRole, setshowRole] = useState<boolean>(true);
 
     const getLatestState = useCallback(() => {
@@ -42,6 +46,8 @@ function InsiderComponent() {
             setConfirmStartOpen(false)
             setConfirmGuessedOpen(false)
             setConfirmTimeUpOpen(false)
+            setCastVoteOpen(false)
+            setConfirmCompleteOpen(false)
             setGameState(e)
         });
     }, [playerId]);
@@ -79,6 +85,12 @@ function InsiderComponent() {
             case "TIME_UP":
                 return <div key={gameAction}><Button variant={"outlined"}
                                                      onClick={() => setConfirmTimeUpOpen(true)}>Time Up</Button></div>
+            case "VOTE_PLAYER":
+                return <div key={gameAction}><Button variant={"outlined"}
+                                                     onClick={() => setCastVoteOpen(true)}>Cast Vote</Button></div>
+            case "COMPLETE_VOTING":
+                return <div key={gameAction}><Button variant={"outlined"}
+                                                     onClick={() => setConfirmCompleteOpen(true)}>Voting Complete</Button></div>
             default:
                 return <div key={gameAction}><Button variant={"outlined"}>{gameAction}</Button></div>
         }
@@ -107,15 +119,17 @@ function InsiderComponent() {
                 }
                 voteArray.sort((x,y) => y.count - x.count);
                 let accusedPlayer = null;
-                if((voteArray.length > 1 && voteArray[0] > voteArray[1]) || voteArray.length === 1) {
-                    accusedPlayer = voteArray[0]
+                let validVotes = voteArray.filter(vote => vote.player != 'no vote')
+                if((validVotes.length > 1 && validVotes[0] > validVotes[1]) || validVotes.length === 1) {
+                    accusedPlayer = validVotes[0]
                 }
                 const insiderLost = accusedPlayer?.player === summary?.insider
                 return <Stack mt={3} justifyContent="center">
-                    <p>Insider: {summary?.insider}</p>
-                    <p>Secret Word: {summary?.secretWord}</p>
+                    <p><strong>Insider</strong>: {summary?.insider}</p>
+                    <p><strong>Secret Word</strong>: {summary?.secretWord}</p>
+                    <p><strong>Winner</strong>: {insiderLost ? "The Commons" : "The Insider"}</p>
+                    <p><strong>Votes</strong></p>
                     {voteArray.map(e => <p key={e.player}>{e.player}: {e.count}</p>)}
-                    <p>Winner: {insiderLost ? "The Commons" : "The Insider"}</p>
                 </Stack>
             case "LOST":
                 return <Stack mt={3} justifyContent="center">
@@ -129,7 +143,9 @@ function InsiderComponent() {
                 return <div>
                     <Countdown date={Date.parse(gameState.lastActivity || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5)*1000*60} />
                     {/* <Countdown date={Date.now() + 1000} /> */}
-                    </div>
+                </div>
+            case "FIND_INSIDER":
+                return gameState.players?.map(e => <p key={e.name}>{e.name} - {e.accusedPlayer ? e.accusedPlayer : "Thinking"}</p>)
             default:
                 return <div></div>
         }
@@ -152,6 +168,8 @@ function InsiderComponent() {
         <ConfirmStartComponent playerId={playerId} open={confirmStartOpen} handleClose={getLatestState}/>
         <ConfirmGuessedComponent playerId={playerId} open={confirmGuessedOpen} handleClose={getLatestState}/>
         <ConfirmTimeupComponent playerId={playerId} open={confirmTimeupOpen} handleClose={getLatestState}/>
+        <CastVoteComponent playerId={playerId} gameState={gameState} open={castVoteOpen} handleClose={getLatestState}/>
+        <ConfirmVotingCompleteComponent playerId={playerId}open={confirmCompleteOpen} handleClose={getLatestState}/>
     </div>
 }
 
