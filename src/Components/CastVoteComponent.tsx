@@ -36,7 +36,8 @@ function CastVoteComponent(props: Props) {
             value={accused}
             onChange={e => setAccused(e.target.value)}
         >
-            {props.gameState.players?.filter(player => player.id !== props.playerId).map(player =>
+            {props.gameState.players?.filter(player => player.id !== props.playerId && player.active)
+                .map(player =>
                 <FormControlLabel key={player.id} value={player.id} control={<Radio/>} label={player.name}/>)}
         </RadioGroup>
     }

@@ -40,17 +40,6 @@ function JoinGameComponent(props: Props) {
             <TextField
                 autoFocus
                 margin="dense"
-                id="playerName"
-                label="Player Name"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={playerName}
-                onChange={e => setPlayerName(e.target.value)}
-            />
-            <TextField
-                autoFocus
-                margin="dense"
                 id="gameCode"
                 label="Game Code"
                 type="text"
@@ -58,6 +47,17 @@ function JoinGameComponent(props: Props) {
                 variant="standard"
                 value={gameCode}
                 onChange={e => setGameCode(e.target.value)}
+            />
+            <TextField
+                autoFocus
+                margin="dense"
+                id="playerName"
+                label="Player Name"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={playerName}
+                onChange={e => setPlayerName(e.target.value)}
             />
             {errorText && <DialogContentText style={{color: 'red'}} mt={4}>{errorText}</DialogContentText>}
         </DialogContent>

@@ -16,6 +16,7 @@ import ConfirmTimeupComponent from "./ConfirmTimeupComponent";
 import Countdown from 'react-countdown';
 import CastVoteComponent from "./CastVoteComponent";
 import ConfirmVotingCompleteComponent from "./ConfirmVotingCompleteComponent";
+import useInterval from "../hooks/useInterval"
 
 function InsiderComponent() {
     const [gameState, setGameState] = useState<GameStateDto>({});
@@ -55,6 +56,19 @@ function InsiderComponent() {
     useEffect(() => {
         getLatestState();
     }, [getLatestState, playerId]);
+
+    const isDialogOpen = () => {
+        return createGameOpen || joinGameOpen || playerReadyOpen || confirmBeginOpen || confirmResetOpen
+            || confirmSwapWordOpen || confirmStartOpen || confirmGuessedOpen || confirmTimeupOpen
+            || castVoteOpen || confirmCompleteOpen;
+    }
+
+    useInterval(async() => {
+        console.log("interval");
+        if(gameState.code && !isDialogOpen()) {
+            getLatestState();
+        }
+    }, 3000);
 
     function getAction(gameAction: string) {
         switch (gameAction) {
@@ -96,20 +110,24 @@ function InsiderComponent() {
         }
     }
 
+    function getRoleInfo() {
+        return <>
+            <div><Button variant={"contained"}
+                         onClick={() => setshowRole(!showRole)}>{showRole ? "Hide Role" : "Show Role"}</Button>
+            </div>
+            <div style={{display: showRole ? 'block' : 'none'}}>
+                <p>Your Role: {gameState.yourRole}</p>
+                {gameState.secretWord && <p>Secret Word: {gameState.secretWord}</p>}
+            </div>
+        </>;
+    }
+
     function getInfoArea() {
         switch (gameState.status) {
             case "WAITING":
                 return gameState.players?.map(e => <p key={e.id}>{e.name} - {e.active ? "Ready" : "Not Ready"}</p>)
             case "PRE_GAME":
-                return <Stack mt={3} justifyContent="center">
-                    <div><Button variant={"contained"}
-                                 onClick={() => setshowRole(!showRole)}>{showRole ? "Hide Role" : "Show Role"}</Button>
-                    </div>
-                    <div style={{display: showRole ? 'block' : 'none'}}>
-                        <p>Your Role: {gameState.yourRole}</p>
-                        {gameState.secretWord && <p>Secret Word: {gameState.secretWord}</p>}
-                    </div>
-                </Stack>
+                return <Stack mt={3} justifyContent="center">{getRoleInfo()}</Stack>
             case "SUMMARY":
                 const summary = gameState.gameSummary;
                 const votes = summary?.votes || {}
@@ -138,14 +156,18 @@ function InsiderComponent() {
                     <p>Secret Word: {gameState.gameSummary?.secretWord}</p>
                 </Stack>
             case "PLAYING":
-                console.log("Countdown " + Date.parse(gameState.lastActivity || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5)*6000)
-                console.log("Now" + Date.now());
                 return <div>
-                    <Countdown date={Date.parse(gameState.lastActivity || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5)*1000*60} />
-                    {/* <Countdown date={Date.now() + 1000} /> */}
+                    <Countdown
+                        overtime
+                        daysInHours={true}
+                        date={Date.parse(gameState.playStartTime || Date.now().toString()) + (gameState.gameSettings?.guessTimeLimit || 5) * 1000 * 60}
+                    />
+                    <br/>
+                    <br/>
+                    {getRoleInfo()}
                 </div>
             case "FIND_INSIDER":
-                return gameState.players?.map(e => <p key={e.name}>{e.name} - {e.accusedPlayer ? e.accusedPlayer : "Thinking"}</p>)
+                return gameState.players?.map(e => <p key={e.name}>{e.name} - {e.accusedPlayer ? e.accusedPlayer : ""}</p>)
             default:
                 return <div></div>
         }
